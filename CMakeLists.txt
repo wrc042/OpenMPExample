@@ -3,7 +3,9 @@ project(omp-example)
 set(CMAKE_CXX_STANDARD 11)
 
 find_package(OpenMP)
-add_compile_options(-Wunknown-pragmas)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    add_compile_options(-Wunknown-pragmas)
+endif()
 
 add_executable(hello src/hello.cpp)
 target_link_libraries(hello OpenMP::OpenMP_CXX)
