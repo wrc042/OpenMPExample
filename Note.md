@@ -330,6 +330,20 @@ parallel for支持的从句：
 
 `schedule`见`src/inner_product.cpp`
 
+执行结果
+
+```
+# export OMP_SCHEDULE="dynamic"
+size: 1024
+sequence time: 1.46233
+omp time: 0.133192
+
+# export OMP_SCHEDULE="static"
+size: 1024
+sequence time: 1.47874
+omp time: 0.219114
+```
+
 ### Reduction
 
 见`src/vector_norm.cpp`

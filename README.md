@@ -2,7 +2,7 @@
 
 ## Usage
 
-Now only tested on Ubuntu 20.04.
+Now only tested on Ubuntu 20.04 with GCC and Windows 11 with MSVC.
 
 ```bash
 mkdir build
