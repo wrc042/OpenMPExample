@@ -1,6 +1,8 @@
 # Note
 
-## 介绍
+edit in vscode by Markdown Preview Enhanced.
+
+## 简介
 
 ### OpenMP是什么
 
@@ -43,7 +45,7 @@
 
 - 单线程（initial thread）开始执行
 - 进入并行区（parallel region）开始并行执行
-- 在并行区结尾进行同步和结束线程，继续单线程执行程序
+- 在并行区结尾**进行同步**和结束线程，继续单线程执行程序
 
 ## 基础知识
 
@@ -58,7 +60,9 @@
 
 @import "img/os_thread.png"
 
-你可以简单理解，操作系统会自行将线程调度到CPU核心运行。所以当线程数目超过核心数，会出现多个线程抢占一个CPU核心，导致性能下降
+- 你可以简单理解，硬件和操作系统会自行将线程调度到CPU核心运行
+- 所以当线程数目超过核心数，会出现多个线程抢占一个CPU核心，导致性能下降
+- 超线程（hyper-threading）将单个CPU物理核心抽象为多个（目前通常为2个）逻辑核心，共享物理核心的计算资源
 
 ### 硬件内存模型
 
@@ -72,16 +76,14 @@
 
 实际的内存模型更加复杂
 
-@import "img/hardware_affinity.png"
-
 @import "img/hardware_zen.png"
 
-openmp支持控制线程的绑定
+@import "img/hardware_affinity.png"
 
-- 环境变量OMP_PROC_BIND/从句`proc_bind(master|close|spread)`：控制线程绑定与否，以及线程对于绑定单元（称为 place）分布
-- 环境变量OMP_PLACES：控制每个place的对应，常用threads/cores/sockets
-
-参考[文档](https://lab.cs.tsinghua.edu.cn/hpc/doc/faq/binding/#:~:text=OMP_PROC_BIND%20%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%20%2F%20proc_bind%20%E6%8C%87%E4%BB%A4%20%EF%BC%9A%E6%8E%A7%E5%88%B6%E7%BA%BF%E7%A8%8B%E7%BB%91%E5%AE%9A%E4%B8%8E%E5%90%A6%EF%BC%8C%E4%BB%A5%E5%8F%8A%E7%BA%BF%E7%A8%8B%E5%AF%B9%E4%BA%8E%E7%BB%91%E5%AE%9A%E5%8D%95%E5%85%83%EF%BC%88%E7%A7%B0%E4%B8%BA,place%EF%BC%89%E5%88%86%E5%B8%83%20OMP_PLACES%20%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%20%EF%BC%9A%E6%8E%A7%E5%88%B6%E6%AF%8F%E4%B8%AA%20place%20%E7%9A%84%E5%AF%B9%E5%BA%94%EF%BC%8C%E5%B8%B8%E7%94%A8%20threads%2Fcores%2Fsockets)以及相关官方手册
+- openmp支持控制线程的绑定
+  - 环境变量OMP_PROC_BIND/从句`proc_bind(master|close|spread)`：控制线程绑定与否，以及线程对于绑定单元（称为 place）分布
+  - 环境变量OMP_PLACES：控制每个place的对应，常用threads/cores/sockets
+- 参考[文档](https://lab.cs.tsinghua.edu.cn/hpc/doc/faq/binding/#:~:text=OMP_PROC_BIND%20%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%20%2F%20proc_bind%20%E6%8C%87%E4%BB%A4%20%EF%BC%9A%E6%8E%A7%E5%88%B6%E7%BA%BF%E7%A8%8B%E7%BB%91%E5%AE%9A%E4%B8%8E%E5%90%A6%EF%BC%8C%E4%BB%A5%E5%8F%8A%E7%BA%BF%E7%A8%8B%E5%AF%B9%E4%BA%8E%E7%BB%91%E5%AE%9A%E5%8D%95%E5%85%83%EF%BC%88%E7%A7%B0%E4%B8%BA,place%EF%BC%89%E5%88%86%E5%B8%83%20OMP_PLACES%20%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%20%EF%BC%9A%E6%8E%A7%E5%88%B6%E6%AF%8F%E4%B8%AA%20place%20%E7%9A%84%E5%AF%B9%E5%BA%94%EF%BC%8C%E5%B8%B8%E7%94%A8%20threads%2Fcores%2Fsockets)以及相关官方手册
 
 ## OpenMP编程
 
@@ -114,18 +116,24 @@ add_executable(hello src/hello.cpp)
 target_link_libraries(hello OpenMP::OpenMP_CXX)
 ```
 
-加入`-Wunknown-pragmas`会在编译时报告没有处理的`#pragma`语句
+gcc加入`-Wunknown-pragmas`会在编译时报告没有处理的`#pragma`语句
 
 ### Hello
 
 见`src/hello.cpp`
 
 ```cpp
+#include <iostream>
+#include <omp.h>
+
+int main() {
 #pragma omp parallel num_threads(8)
-{
-  int tid = omp_get_thread_num();
-  int num_threads = omp_get_num_threads();
-  printf("Hello from thread %d of %d\n", tid, num_threads);
+  {
+    int tid = omp_get_thread_num();
+    int num_threads = omp_get_num_threads();
+    printf("Hello from thread %d of %d\n", tid, num_threads);
+  }
+  return 0;
 }
 ```
 
@@ -194,6 +202,8 @@ double omp_get_wtick(void)
 数据从句见`src/data_clause.cpp`
 
 ```cpp
+int cnt;
+cnt = 1;
 #pragma omp parallel num_threads(4)
 {
   int tid = omp_get_thread_num();
@@ -203,6 +213,7 @@ double omp_get_wtick(void)
   results[tid] = cnt;
 }
 
+cnt = 1;
 #pragma omp parallel num_threads(4) private(cnt)
 {
   int tid = omp_get_thread_num();
@@ -212,6 +223,7 @@ double omp_get_wtick(void)
   results[tid] = cnt;
 }
 
+cnt = 1;
 #pragma omp parallel num_threads(4) firstprivate(cnt)
 {
   int tid = omp_get_thread_num();
@@ -231,14 +243,6 @@ firstprivate: 5 5 5 5
 ```
 
 ### for构造
-
-在并行区内对for循环进行线程划分，且for循环满足格式要求：
-
-- init-expr：需要是`var=lb`形式，类型也有限制
-- test-expr：限制为`var relational-opb`或者`b relational-op var`
-- incr-expr：仅限加减法
-
-详细参考[OpenMP API 5.0 Specification](https://www.openmp.org/wp-content/uploads/openmp-4.5.pdf), p53
 
 for构造见`src/hello_for.cpp`
 
@@ -291,7 +295,15 @@ Hello from thread 2
 Hello from thread 0
 ```
 
-常常将parallel和for合并为parallel for指导语句
+在并行区内对for循环进行线程划分，且for循环满足格式要求：
+
+- init-expr：需要是`var=lb`形式，类型也有限制
+- test-expr：限制为`var relational-opb`或者`b relational-op var`
+- incr-expr：仅限加减法
+
+详细参考[OpenMP API 4.5 Specification](https://www.openmp.org/wp-content/uploads/openmp-4.5.pdf), p53
+
+常常将parallel和for合并为parallel for制导语句
 
 parallel for支持的从句：
 
@@ -321,14 +333,39 @@ parallel for支持的从句：
 - `collapse(n)`：应用于n重循环
   - 合并循环
   - 注意循环之间是否有数据依赖
-- `nowait`取消代码块结束时的栅栏同步（barrier）
-- `schedule(type [,chunk])`：控制调度方式
+- `nowait`：取消代码块结束时的栅栏同步（barrier）
+- `schedule(type [, chunk])`：控制调度方式
   - `static`：chunk大小固定（默认n/p）
   - `dynamic`：动态调度，chunk大小固定（默认为1）
   - `guided`：chunk大小动态缩减
   - `runtime`：由系统环境变量OMP_SCHEDULE决定
 
 `schedule`见`src/inner_product.cpp`
+
+```cpp
+for (int i = 0; i < N; i++) {
+  for (int j = i; j < N; j++) {
+    double sum = 0;
+    for (int k = 0; k < N; k++) {
+      sum += A[i * N + k] * A[j * N + k];
+    }
+    B[i * N + j] = sum;
+    B[j * N + i] = sum;
+  }
+}
+
+#pragma omp parallel for schedule(runtime)
+for (int i = 0; i < N; i++) {
+  for (int j = i; j < N; j++) {
+    double sum = 0;
+    for (int k = 0; k < N; k++) {
+      sum += A[i * N + k] * A[j * N + k];
+    }
+    B[i * N + j] = sum;
+    B[j * N + i] = sum;
+  }
+}
+```
 
 执行结果
 
@@ -400,6 +437,44 @@ omp sync time: 7.74378
 - 各个线程执行计算
 - 所有`omp_priv`和`omp_in`一起顺序进行reduction，写回原变量
 
+### sections构造
+
+- 将并行区内的代码块划分为多个section分配执行
+- 可以搭配parallel合成为parallel sections构造
+- 每个section由一个线程执行
+  - 线程数大于section数目：部分线程空闲
+  - 线程数小于section数目：部分线程分配多个section
+
+```cpp
+#pragma omp sections
+{
+#pragma omp section
+  code1();
+#pragma omp section
+  code2();
+}
+```
+
+### 同步构造
+
+`#pragma omp barrier`：在特定位置进行栅栏同步
+
+@import "img/sync_barrier.png"
+
+`#pragma omp single`：某段代码单线程执行，带隐式同步（使用nowait去掉）
+
+@import "img/sync_single.png"
+
+`#pragma omp master`：采用主线程执行，无隐式同步
+
+@import "img/sync_master.png"
+
+`#pragma omp critical`：某段代码线程互斥执行
+
+@import "img/sync_critical.png"
+
+`#pragma omp atomic`：单个特定格式的语句或语句组中某个变量进行原子操作
+
 ### False Sharing
 
 见`src/matrix_vector.cpp`
@@ -447,46 +522,11 @@ simple omp time: 0.0973124
 false sharing time: 0.129693
 ```
 
+@import "img/false_sharing.jpg"
+
 - 耗时增加24%
-- 不同核心对同一cache line的同时读写会造成严重的冲突，导致该级缓存失效。
+- 不同核心对同一cache line的同时读写会造成严重的冲突，导致该级缓存失效
 
-### sections构造
-
-- 将并行区内的代码块划分为多个section分配执行
-- 可以搭配parallel合成为parallel sections构造
-- 每个section由一个线程执行
-  - 线程数大于section数目：部分线程空闲
-  - 线程数小于section数目：部分线程分配多个section
-
-```cpp
-#pragma omp sections
-{
-#pragma omp section
-  code1();
-#pragma omp section
-  code2();
-}
-```
-
-### 同步构造
-
-`#pragma omp barrier`：在特定位置进行栅栏同步
-
-@import "img/sync_barrier.png"
-
-`#pragma omp single`：某段代码单线程执行，带隐式同步（使用nowait去掉）
-
-@import "img/sync_single.png"
-
-`#pragma omp master`：采用主线程执行，无隐式同步
-
-@import "img/sync_master.png"
-
-`#pragma omp critical`：某段代码线程互斥执行
-
-@import "img/sync_critical.png"
-
-`#pragma omp atomic`：单个特定格式的语句或语句组中某个变量进行原子操作
 
 ## 更多特性
 
@@ -516,6 +556,8 @@ false sharing time: 0.129693
 - `-fopt-info-vec-missed`
 
 ### GPU支持
+
+@import "img/more_gpu.png"
 
 - 参考[网页](https://www.openmp.org/updates/openmp-accelerator-support-gpus/)
 - 从OpenMP API 4.0开始支持
