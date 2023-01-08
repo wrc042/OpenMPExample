@@ -10,3 +10,5 @@ cd build
 cmake ..
 make
 ```
+
+On Windows, you can try [this](https://blog.csdn.net/Nichlson/article/details/113763551).
